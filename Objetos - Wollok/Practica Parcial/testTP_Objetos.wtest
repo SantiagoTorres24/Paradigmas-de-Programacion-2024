@@ -1,0 +1,177 @@
+import TP_Guerreros.*
+import TP_Arsenal.* 
+import TP_Zonas.*
+
+const baculo = new Baculo (poderBaculo = 400)
+
+const espadaElfica = new Espada (valorOrigen = 30, multiplicador = 10) 
+const espadaEnana = new Espada (valorOrigen = 20, multiplicador = 10)
+const espadaHumana = new Espada (valorOrigen = 15, multiplicador = 10)
+const espadaElficaFrodo = new Espada (valorOrigen = 30, multiplicador = 8)
+const espadaElficaLegolas = new Espada (valorOrigen = 30, multiplicador = 12)
+const espadaAndurilElfica = new Espada (valorOrigen = 30, multiplicador = 18)
+const espadaGlamdringElfica = new Espada (valorOrigen = 30, multiplicador = 10)
+
+const dagaElfica = new Daga (valorOrigen = 25, multiplicador = 10)
+const dagaEnana = new Daga (valorOrigen = 20, multiplicador = 10)
+const dagaHumana = new Daga (valorOrigen = 15, multiplicador = 10)
+const dagaEnanaAragorn = new Daga (valorOrigen = 20, multiplicador = 10)
+
+const arco = new Arco (largo = 110)
+
+const hacha = new Hacha(largoMango = 50, pesoHoja = 5)
+const hachaGimli = new Hacha(largoMango = 70, pesoHoja = 5)
+
+describe "Arsenal" {
+  test "El poder de una espada con multiplicador 15 y de origen Enano es 300" {
+    espadaEnana.cambiarMultiplicador(15)
+    const resultado = espadaEnana.poderArma()
+
+    assert.equals(300, resultado)
+  }
+
+  test "El poder de una daga con multiplicador 15 y origen Enano es 150" {
+    dagaEnana.cambiarMultiplicador(15)
+    const resultado = dagaEnana.poderArma()
+
+    assert.equals(150, resultado)
+  }
+
+  test "El poder de un hacha con mango de 50cm y una hoja de 5kg es 250" {
+    const resultado = hacha.poderArma()
+
+    assert.equals(250, resultado)
+  }
+
+  test "El poder de un arco con longitud de 110cm es 440" {
+    const resultado = arco.poderArma()
+
+    assert.equals(440, resultado)
+  }
+
+  test "El poder de un arco con 35kg de tension y longitud de 110 es 385" {
+    arco.cambiarTension(35)
+    const resultado = arco.poderArma()
+
+    assert.equals(385, resultado) 
+  }
+}
+
+
+const frodo = new Hobbit (vida = 50, armas = [espadaElficaFrodo], items = [])
+const gimli = new Enano (vida = 75, armas = [hachaGimli, hachaGimli], factorPoder = 3, items = [])
+const legolas = new Elfo (vida = 80, destrezaPropia = 1, armas = [arco, espadaElficaLegolas], items = [])
+const aragorn = new Humano (vida = 85, armas = [espadaAndurilElfica, dagaEnanaAragorn], limitadorPoder = 20, items = [])
+const gandalf = new Maiar(vida = 100, armas = [baculo, espadaGlamdringElfica], items = [], vidaAmenaza = 10) 
+const gollum = new Gollum (vida = 90, armas = [espadaElficaFrodo], items = [])
+
+describe "Guerreros" {
+  test "El poder de Frodo sin items es 290" {
+    const resultado = frodo.poder()
+
+    assert.equals(290, resultado)
+  }
+
+  test "El poder de Gimli es 2175" {
+    const resultado = gimli.poder()
+
+    assert.equals(2175, resultado)
+  }
+
+  test "El poder de Legolas es 2480" {
+    const resultado = legolas.poder()
+
+    assert.equals(2480, resultado)
+  }
+
+  test "El poder de Aragorn es 2720" {
+    const resultado = aragorn.poder()
+
+    assert.equals(2720, resultado)
+  }
+
+  test "El poder de Gandalf es 2900" {
+    const resultado = gandalf.poder()
+
+    assert.equals(2900, resultado)
+  }
+
+  test "El poder de Gandalf con 9 de vida y todas sus armas es 4100" {
+    gandalf.disminuirVida(91)
+    const resultado = gandalf.poder()
+
+    assert.equals(4100, resultado)
+  }
+
+  test "El poder de Legolas con medio punto de destreza propia adicional es 2880" {
+    legolas.cambiarDestrezaPropia(1.5)
+    const resultado = legolas.poder()
+
+    assert.equals(2880, resultado)
+  }
+}
+
+const belfalas = new Zona(requerimiento = reqVacio, consecuencias = consecuenciaNula)
+const lebennin = new Zona (requerimiento = poder1500, consecuencias = consecuenciaNula)
+const minasTirith = new Zona(requerimiento = diezLembas, consecuencias = disminuirVida)
+const bosqueDeFangorn = new Zona(requerimiento = tienenArmas, consecuencias = consecuenciaNula)
+const edoras = new Zona(requerimiento = reqVacio, consecuencias = consecuenciaNula)
+const estemnet = new Zona(requerimiento = tresCapasElficas, consecuencias = consecuenciaNula) 
+
+const reqVacio = new RequerimientoVacio()
+
+const diezLembas = new RequerimientoItem (item = "Lemba", cantidad = 10)
+const tresCapasElficas = new RequerimientoItem (item = "Capa Elfica", cantidad = 3)
+
+const poder1500 = new RequerimientoGuerrero(condicion = { guerrero => guerrero.poder() >= 1500})
+const tienenArmas = new RequerimientoGuerrero(condicion = { guerrero => guerrero.tieneArmas()})
+
+const aumentarVida = new ConsecuenciaModificarVida(condicion = {guerrero => guerrero.aumentarVida(1)})
+const disminuirVida = new ConsecuenciaModificarVida(condicion = {guerrero => guerrero.disminuirVida(10)})
+const consecuenciaNula = new ConsecuenciaNula()
+
+
+const caminoEjemplo = new Camino(zonas = [bosqueDeFangorn, edoras, belfalas, minasTirith])
+const caminoGondor = new Camino(zonas = [lebennin, minasTirith])
+
+describe "Caminos" {
+  test "El grupo formado por Gandalf y Frodo no puede pasar por Minas Tirith porque ninguno tiene una Lemba" {
+    const grupo = [gandalf, frodo]
+    const resultado = minasTirith.permitePasar(grupo)
+
+    assert.equals(false, resultado)
+}
+
+  test "El grupo formado por Frodo y Legolas(sin armas) no puede pasar por Lebennin porque ninguno tiene un poder mayor a 1500 " {
+    legolas.quitarArma(arco)
+    legolas.quitarArma(espadaElficaLegolas)
+    
+    const grupo = [frodo, legolas]
+    const resultado = lebennin.permitePasar(grupo)
+
+    assert.equals(false, resultado)
+  }
+
+  test "El grupo formado por todos los guerreros puede pasar por Belfalas" {
+    const grupo = [frodo, legolas, gandalf, aragorn, gimli]
+    const resultado = belfalas.permitePasar(grupo)
+
+    assert.equals(true, resultado)
+  }
+
+  test "El grupo formado por Gandalf y Frodo no puede atravesar el camino de Bosque de Fangorn, Edoras, Belfalas y Minas Tirith" {
+    const grupo = [frodo, gandalf]
+    const resultado = caminoEjemplo.puedeRecorrerCamino(grupo)
+
+    assert.equals(false, resultado)
+  }
+
+  test "El grupo formado Frodo y Legolas(con 10 Lembas) por puede atravesar el camino de Bosque de Fangorn, Edoras, Belfalas y Minas Tirith" {
+    legolas.agregarItem10Veces("Lemba")
+
+    const grupo = [frodo, legolas]
+    const resultado = caminoEjemplo.puedeRecorrerCamino(grupo)
+
+    assert.equals(true, resultado)
+  }
+}
